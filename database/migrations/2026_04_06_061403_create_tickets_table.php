@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnUpdate();
             $table->string('topic');
             $table->text('text');
-            $table->string('status')->default('new'); // new , inprocess ,done
+            $table->string('status')->default('new');
             $table->dateTime('response_date');
             $table->timestamps();
         });
