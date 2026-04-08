@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\Ticket;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -87,5 +88,34 @@ class TicketController extends Controller
             'tickets' => $tickets,
             'custom_id' => $customer_id
         ]);
+    }
+
+    public function statistics($user_id)
+    {
+        $user = User::where('id', $user_id)->first();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => "Forbidden"
+            ], 403);
+        }
+
+
+        $daily = Ticket::whereDate('created_at', Carbon::today())->count();
+
+        $weekly = Ticket::whereBetween('created_at', [
+            Carbon::now()->startOfWeek(),
+            Carbon::now()->endOfWeek()
+        ])->count();
+
+        $monthly = Ticket::whereMonth('created_at', Carbon::now()->month)->count();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Ok",
+            'daily_tickets' => $daily,
+            'weekly_tickets' => $weekly,
+            'monthly_tickets' => $monthly
+        ], 200);
     }
 }

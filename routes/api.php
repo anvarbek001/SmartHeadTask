@@ -10,3 +10,4 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 Route::post('/customer/store', [CustomerController::class, 'store'])->name('customer.store');
 Route::resource('/tickets', TicketController::class);
+Route::get('/tickets/statistics/{user_id}', [TicketController::class, 'statistics'])->name('tickets.statistics');
