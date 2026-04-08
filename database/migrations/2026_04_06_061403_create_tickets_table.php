@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('topic');
             $table->text('text');
             $table->string('status')->default('new');
-            $table->dateTime('response_date');
+            $table->dateTime('response_date')->nullable();
             $table->timestamps();
         });
     }
