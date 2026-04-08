@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Customer;
 use App\Models\Ticket;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Http\UploadedFile;
 
@@ -34,7 +35,12 @@ class TicketFactory extends Factory
     public function withFile()
     {
         return $this->afterCreating(function (Ticket $ticket) {
-            $ticket->addMedia(UploadedFile::fake()->create('document.pdf', 250))->toMediaCollection('attachments');
+            $pdf = Pdf::loadView('tickets.pdf', ['ticket' => $ticket]);
+
+            $ticket->addMediaFromString($pdf->output())
+                ->usingFileName("ticket-{$ticket->id}.pdf")
+                ->usingName("Ticket #{$ticket->id}")
+                ->toMediaCollection('ticket_pdf');
         });
     }
 }

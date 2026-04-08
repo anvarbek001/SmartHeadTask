@@ -118,4 +118,15 @@ class TicketController extends Controller
             'monthly_tickets' => $monthly
         ], 200);
     }
+
+    public function updateStatus(Request $request, Ticket $ticket)
+    {
+        $request->validate([
+            'status' => 'required'
+        ]);
+
+        $ticket->update(['status' => $request->status]);
+
+        return response()->json(['success' => true]);
+    }
 }
