@@ -276,10 +276,20 @@
             font-size: 0.78rem;
             margin-top: 1.2rem;
         }
+
+        .login_btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+        }
     </style>
 </head>
 
 <body>
+    <div>
+        <a href="{{ route('login') }}" class="btn btn-outline-success btn-sm login_btn">login</a>
+    </div>
     <div class="wrapper">
         <div class="badge">Ticket</div>
 

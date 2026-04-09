@@ -151,13 +151,13 @@
         .row-num {
             color: #9ca3af;
             font-size: 12px;
-            width: 48px;
         }
 
         .customer-cell {
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-left: -50px;
         }
 
         .avatar {
@@ -341,7 +341,14 @@
         <div class="adm-header">
             <h1 class="adm-title">Applications</h1>
             <span class="adm-count">Total: {{ $tickets->count() }} </span>
+            <div>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button class="btn btn-danger btn-sm">logout</button>
+                </form>
+            </div>
         </div>
+
 
         <div class="stats-row">
             <div class="stat-card">
@@ -362,6 +369,41 @@
             </div>
         </div>
 
+        <div class="d-flex align-items-center gap-2">
+            <form action="{{ route('admin') }}" method="GET">
+                @csrf
+                <label class="form-label">
+                    Name
+                    <input type="text" id="filter_name" name="name" class="form-control form-control-sm"
+                        placeholder="Name">
+                </label>
+                <label class="form-label">
+                    Email
+                    <input type="text" id="emailInput" name="email" class="form-control form-control-sm"
+                        placeholder="Email">
+                </label>
+                <label class="form-label">
+                    Start date
+                    <input type="date" name="start_date" class="form-control form-control-sm">
+                </label>
+                <label class="form-label">
+                    End date
+                    <input type="date" name="end_date" class="form-control form-control-sm">
+                </label>
+                <label class="form-label">
+                    Status
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">all</option>
+                        <option value="new">new</option>
+                        <option value="inprocess">inprocess</option>
+                        <option value="done">done</option>
+                    </select>
+                </label>
+                <button class="btn btn-primary btn-sm">filter</button>
+                <a href="{{ route('admin') }}" class="btn btn-success btn-sm">cleaning</a>
+            </form>
+        </div>
+
         <div class="tbl-wrap">
             <div class="tbl-toolbar">
                 <span class="tbl-toolbar-title">All applications</span>
@@ -371,11 +413,14 @@
                     <tr>
                         <th>#</th>
                         <th>Customer</th>
+                        <th>Phone</th>
                         <th>Topic</th>
                         <th>Text</th>
                         <th>Status</th>
                         <th>Date</th>
-                        <th>PDF</th>
+                        @role('admin')
+                            <th>PDF</th>
+                        @endrole
                     </tr>
                 </thead>
                 <tbody>
@@ -394,6 +439,7 @@
                                     </div>
                                 </div>
                             </td>
+                            <td>{{ $ticket->customer->phone }}</td>
                             <td>
                                 <div class="topic-text">{{ $ticket->topic }}</div>
                             </td>
@@ -407,8 +453,8 @@
                                     </option>
                                     <option value="inprocess" {{ $ticket->status === 'inprocess' ? 'selected' : '' }}>
                                         inprocess</option>
-                                    <option value="done" {{ $ticket->status === 'done' ? 'selected' : '' }}>
-                                        done</option>
+                                    <option value="done" {{ $ticket->status === 'done' ? 'selected' : '' }}>done
+                                    </option>
                                 </select>
                             </td>
                             <td>
@@ -416,20 +462,18 @@
                                     {{ $ticket->response_date ?? $ticket->created_at->format('Y-m-d') }}</div>
                             </td>
                             <td>
-                                @if ($ticket->getFirstMediaUrl('ticket_pdf'))
-                                    <a href="{{ $ticket->getFirstMediaUrl('ticket_pdf') }}" download class="btn-pdf">
-                                        <svg width="11" height="11" viewBox="0 0 16 16" fill="none">
-                                            <path d="M8 1v9m0 0L5 7m3 3 3-3M2 13h12" stroke="#4338ca" stroke-width="1.8"
-                                                stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                        Download
-                                    </a>
-                                @else
-                                    <span class="no-pdf">—</span>
-                                @endif
+                                @role('admin')
+                                    @if ($ticket->getFirstMediaUrl('ticket_pdf'))
+                                        <a href="{{ $ticket->getFirstMediaUrl('ticket_pdf') }}" download
+                                            class="btn-pdf">Download</a>
+                                    @else
+                                        <span class="no-pdf">—</span>
+                                    @endif
+                                @endrole
                             </td>
                         </tr>
                     @endforeach
+
                 </tbody>
             </table>
         </div>
@@ -437,8 +481,8 @@
     <div style="display:flex; justify-content:center;">
         {{ $tickets->links() }}
     </div>
-
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         function updateStatus(sel) {
             const id = sel.dataset.id;
