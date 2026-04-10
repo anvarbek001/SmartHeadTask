@@ -21,7 +21,7 @@ A ticket management system built with Laravel 12.
 ## 🚀 Installation
 
 ```bash
-git clone https://github.com/username/SmartHeadTask.git
+git clone https://github.com/anvarbek001/SmartHeadTask.git
 cd SmartHeadTask
 composer install
 cp .env.example .env
