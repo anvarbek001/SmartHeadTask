@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 
 class TicketController extends Controller
 {
+
     public function store(Request $request)
     {
         try {
@@ -89,6 +90,25 @@ class TicketController extends Controller
             'custom_id' => $customer_id
         ]);
     }
+
+    /**
+     * @OA\Get(
+     * path="/api/tickets/statistics/{user_id}",
+     * summary="Customer statistics",
+     * tags={"Tickets"},
+     * @OA\Parameter(
+     * name="user_id",
+     * in="path",
+     * required=true,
+     * description="Customer id",
+     * @OA\Schema(type="integer")
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Successfly"
+     * )
+     * )
+     */
 
     public function statistics($user_id)
     {

@@ -7,8 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
+
 class CustomerController extends Controller
 {
+
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
