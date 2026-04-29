@@ -1,3 +1,4 @@
+@use('App\Enum\TicketStatus');
 <!DOCTYPE html>
 <html lang="uz">
 
@@ -356,16 +357,16 @@
                 <div class="stat-val">{{ $tickets->count() }}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">New</div>
-                <div class="stat-val green">{{ $tickets->where('status', 'new')->count() }}</div>
+                <div class="stat-label">{{ TicketStatus::NEW->label() }}</div>
+                <div class="stat-val green">{{ $tickets->where('status', TicketStatus::NEW)->count() }}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Processing</div>
-                <div class="stat-val blue">{{ $tickets->where('status', 'inprocess')->count() }}</div>
+                <div class="stat-label">{{ TicketStatus::INPROCESS->label() }}</div>
+                <div class="stat-val blue">{{ $tickets->where('status', TicketStatus::INPROCESS)->count() }}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Done</div>
-                <div class="stat-val amber">{{ $tickets->where('status', 'done')->count() }}</div>
+                <div class="stat-label">{{ TicketStatus::DONE->label() }}</div>
+                <div class="stat-val amber">{{ $tickets->where('status', TicketStatus::DONE)->count() }}</div>
             </div>
         </div>
 
@@ -394,9 +395,9 @@
                     Status
                     <select name="status" class="form-select form-select-sm">
                         <option value="">all</option>
-                        <option value="new">new</option>
-                        <option value="inprocess">inprocess</option>
-                        <option value="done">done</option>
+                        <option value="new">{{ TicketStatus::NEW->label() }}</option>
+                        <option value="inprocess">{{ TicketStatus::INPROCESS->label() }}</option>
+                        <option value="done">{{ TicketStatus::DONE->label() }}</option>
                     </select>
                 </label>
                 <button class="btn btn-primary btn-sm">filter</button>
@@ -449,11 +450,14 @@
                             <td>
                                 <select class="status-select badge badge-{{ $ticket->status }}"
                                     data-id="{{ $ticket->id }}" onchange="updateStatus(this)">
-                                    <option value="new" {{ $ticket->status === 'new' ? 'selected' : '' }}>new
+                                    <option value="new"
+                                        {{ $ticket->status === TicketStatus::NEW ? 'selected' : '' }}>new
                                     </option>
-                                    <option value="inprocess" {{ $ticket->status === 'inprocess' ? 'selected' : '' }}>
+                                    <option value="inprocess"
+                                        {{ $ticket->status === TicketStatus::INPROCESS ? 'selected' : '' }}>
                                         inprocess</option>
-                                    <option value="done" {{ $ticket->status === 'done' ? 'selected' : '' }}>done
+                                    <option value="done"
+                                        {{ $ticket->status === TicketStatus::DONE ? 'selected' : '' }}>done
                                     </option>
                                 </select>
                             </td>

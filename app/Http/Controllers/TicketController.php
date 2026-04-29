@@ -2,71 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
+use App\Http\Requests\StoreTicketRequest;
+use App\Http\Requests\TicketStatusRequest;
 use App\Models\Ticket;
-use App\Models\User;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Validator;
+use App\Services\TicketService;
+use App\Services\UserService;
 
 class TicketController extends Controller
 {
-
-    public function store(Request $request)
+    public function store(StoreTicketRequest $request, TicketService $service)
     {
         try {
-            $validate = Validator::make($request->all(), [
-                'custom_id' => 'required',
-                'topic' => 'required',
-                'text' => 'required'
-            ]);
+            $ticket = $service->createTicketForCustomer(
+                $request->custom_id,
+                $request->topic,
+                $request->text
+            );
 
-            if ($validate->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Data entry error"
-                ], 422);
-            }
-
-            $customer = Customer::where('id', $request->custom_id)->first();
-
-            if (!$customer) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Customer not found"
-                ], 400);
-            }
-
-            $customTicket = $customer->tickets()->latest()->first();
-
-            if ($customTicket && $customTicket->created_at->toDateString() === now()->toDateString()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "You have a ticket for today."
-                ], 400);
-            }
-
-            $ticket = Ticket::create([
-                'customer_id' => $customer->id,
-                'topic' => $request->topic,
-                'text' => $request->text,
-                'status' => 'new',
-            ]);
-
-            $pdf = Pdf::loadView('tickets.pdf', ['ticket' => $ticket]);
-
-            $pdfContent = $pdf->output();
-            $fileName = "ticket-{$ticket->id}.pdf";
-
-            $ticket->addMediaFromString($pdfContent)->usingFileName($fileName)->usingName("Ticket #{$ticket->id}")->toMediaCollection('ticket_pdf');
-
-
-            return response()->json([
-                'success' => true,
-                'message' => "Ticket created"
-            ], 201);
+            return response()->json(['success' => true, 'message' => "Ticket created"], 201);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
@@ -77,75 +30,33 @@ class TicketController extends Controller
         }
     }
 
-    public function widget($customer_id)
+    public function widget($customer_id, TicketService $service)
     {
 
         if (!$customer_id) {
             return redirect()->route('/');
         }
 
-        $tickets = Ticket::where('customer_id', $customer_id)->with('media')->get();
+        $tickets = $service->findTicket($customer_id);
         return view('widget.index', [
             'tickets' => $tickets,
             'custom_id' => $customer_id
         ]);
     }
 
-    /**
-     * @OA\Get(
-     * path="/api/tickets/statistics/{user_id}",
-     * summary="Customer statistics",
-     * tags={"Tickets"},
-     * @OA\Parameter(
-     * name="user_id",
-     * in="path",
-     * required=true,
-     * description="Customer id",
-     * @OA\Schema(type="integer")
-     * ),
-     * @OA\Response(
-     * response=200,
-     * description="Successfly"
-     * )
-     * )
-     */
-
-    public function statistics($user_id)
+    public function statistics($user_id, UserService $service)
     {
-        $user = User::where('id', $user_id)->first();
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => "Forbidden"
-            ], 403);
-        }
-
-
-        $daily = Ticket::whereDate('created_at', Carbon::today())->count();
-
-        $weekly = Ticket::whereBetween('created_at', [
-            Carbon::now()->startOfWeek(),
-            Carbon::now()->endOfWeek()
-        ])->count();
-
-        $monthly = Ticket::whereMonth('created_at', Carbon::now()->month)->count();
-
+        $statistics = $service->statistics($user_id);
         return response()->json([
             'success' => true,
             'message' => "Ok",
-            'daily_tickets' => $daily,
-            'weekly_tickets' => $weekly,
-            'monthly_tickets' => $monthly
+            'data' => $statistics,
         ], 200);
     }
 
-    public function updateStatus(Request $request, Ticket $ticket)
+    public function updateStatus(TicketStatusRequest $request, Ticket $ticket, TicketService $service)
     {
-        $request->validate([
-            'status' => 'required'
-        ]);
-
-        $ticket->update(['status' => $request->status]);
+        $service->ticketUpdate($ticket, $request->status);
 
         return response()->json(['success' => true]);
     }

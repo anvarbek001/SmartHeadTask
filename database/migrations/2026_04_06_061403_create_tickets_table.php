@@ -1,5 +1,6 @@
 <?php
 
+use App\Enum\TicketStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +17,7 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnUpdate();
             $table->string('topic');
             $table->text('text');
-            $table->string('status')->default('new');
+            $table->string('status')->default(TicketStatus::NEW->value);
             $table->dateTime('response_date')->nullable();
             $table->timestamps();
         });
